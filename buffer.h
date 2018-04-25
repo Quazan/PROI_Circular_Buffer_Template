@@ -5,8 +5,13 @@ using namespace std;
 template <typename T> class Buffer
 {
 private:
-	 const int MAXSIZE = 4;	
-	int siz;
+	const int MAXSIZE = 5;	
+
+	/*maksymalny rozmiar bufora*/
+
+	int size;
+
+	/*aktualny rozmiar bufora*/
 
 	struct container
 	{
@@ -15,6 +20,8 @@ private:
 
 		T cont;
 	};
+
+	/*lista która przetrzymuje dowolne typy danych*/
 
 	class iterator
 	{		
@@ -27,14 +34,12 @@ private:
 
 		T operator*() const
 		{
-			T tmp;
-			tmp = wsk -> cont;
-			return tmp;
+			return wsk -> cont;
 		}
 
 		iterator& operator ++(int)
 		{
-			iterator tmp = *this;
+			iterator temporary = *this;
 			wsk = wsk -> next;
 			return *this;
 		}
@@ -94,27 +99,59 @@ private:
 				return false;
 			}
 		}
-
-
 	};
 
+	/* iterator z przeciążonymi operatorami do łatwiejszego poruszania się po buforze*/
+
 	iterator first;
+
+	/*iterator wskazujący na pierwszy element w liście*/
+
 	iterator last;
 
+	/*iterator wskazujący na ostatni element w liście*/
+	string error_log;
+	bool error;
 public:
 
 	Buffer();
 	Buffer(const Buffer<T>&);
 	~Buffer();
 	int push(T);
+
+	/* funckja która dodaje pojedynczy element do bufora/ zwraca 1 jeśli nastąpiło nadpisanie jakiegos elementu w buforze i 0 jeśli nie nastąpiło nasdpisanie*/
+
 	T pop();
+
+	/* usuwa pojedynczy element z bufora*/
+
 	const T peak();
+
+	/* zwraca pojedynczy element bufora bez jego usuwania */
+
 	int clear();
+
+	/* funckja która resetuje bufor do jego stanu początkowego */
+
 	const int count();
+
+	string get_error()
+	{
+		string temporary;
+		error = false;
+		temporary = error_log;
+		error_log.clear();
+		return temporary;
+	}
+
+	/*funckja wypisuje aktualny rozmiar bufora */
 
 	template <class U> friend ostream& operator << (ostream& out, const Buffer<U> &);
 	template <class U> friend istream& operator >> (istream& in, Buffer<U> &);
 	template <class U> friend Buffer<U>& operator += (Buffer<U>&, const Buffer<U>&);
+
+	/* przeciążony operator += sumuje dwa bufory */
+
 	template <class U> friend Buffer<U>& operator += (Buffer<U>&, const U&);
 	template <class U> friend bool operator == ( const Buffer<U>&, const Buffer<U>&);
 	template <class U> friend bool operator != ( const Buffer<U>&, const Buffer<U>&);
@@ -128,31 +165,35 @@ public:
 	{
 		if(last.wsk == NULL) return last;
 
-		iterator tmp;
-		tmp = last;
-		tmp++;
+		iterator temporary;
+		temporary = last;
+		temporary++;
 
-		return tmp;
+		return temporary;
 	}
 };
 
 
 template <typename T> Buffer<T> :: Buffer()
 {
-	siz = 0;
+	size = 0;
 	first.wsk = NULL;
 	last.wsk = NULL;
+	error = false;
+	error_log.clear();
 }
 
 template <typename T> Buffer<T> :: Buffer(const Buffer<T>& right)
 {
-	siz = 0;
+	size = 0;
 	first.wsk = NULL;
 	last.wsk = NULL;
+	error = false;
+	error_log.clear();
 
 	*this += right;
 
-	siz = right.siz;
+	//size = right.size;
 }
 
 template <typename T> Buffer<T> :: ~Buffer()
@@ -168,7 +209,7 @@ template <typename T> int Buffer<T> :: push(T t)
 	current -> prev = temporary;
 	current -> cont = t;
 
-	if(last.wsk != NULL)
+	if(last != NULL)
 	{
 		temporary -> next = current;
 	}
@@ -179,28 +220,35 @@ template <typename T> int Buffer<T> :: push(T t)
 
 	last.wsk = current;
 
-	if(siz == MAXSIZE)
+	if(size == MAXSIZE)
 	{
+		if(error == false)
+		{
+			error = true;
+			error_log += "Uwaga utrata danych\n";
+		}
 		pop();
-		siz++;
+		size++;
 		return 1;
 	}
 	else
 	{
-		siz++;
+		size++;
 		return 0;
 	}
 }
 
 template <typename T> T Buffer<T> :: pop()
 {
-	if(first.wsk != NULL)
-	{
-		T t;
-		container * temporary = first.wsk;
-		t = first.wsk -> cont;
+	T t;
 
-		++first;
+	if(size != 0 && first != NULL)
+	{
+		container * temporary = first.wsk;
+
+		t = *first;
+
+		first++;
 
 		if(first.wsk)
 		{
@@ -208,27 +256,35 @@ template <typename T> T Buffer<T> :: pop()
 		}
 
 		delete temporary;
-		siz--;
+		size--;
+
+		if(size == 0)
+		{
+			first.wsk = NULL;
+			last.wsk = NULL;
+		}
 		return t;
 	}
+
+	return t;
 }
 
 template <typename T> const T Buffer<T> :: peak()
 {
 	if(first.wsk != NULL)
 	{
-		return first.wsk -> cont;
+		return *first;
 	}
 }
 
 template <typename T> const int Buffer<T> :: count()
 {
-	return siz;
+	return size;
 }
 
 template <typename T> int Buffer<T> :: clear()
 {
-	siz = 0;
+	size = 0;
 	container * temporary = first.wsk;
 
 	while(first.wsk != NULL)
@@ -246,13 +302,15 @@ template <typename T> int Buffer<T> :: clear()
 	}
 
 	last.wsk = NULL;
+	error_log.clear();
+	error = false;
 }
 
 template <class U> ostream& operator << (ostream & out, Buffer<U> const& buff)
 {
-	if(buff.siz == 0)
+	if(buff.size == 0)
 	{
-		out<<" ";
+		out<<endl;
 	}
 	else
 	{
@@ -272,34 +330,39 @@ template <class U> ostream& operator << (ostream & out, Buffer<U> const& buff)
 
 template <class U> istream& operator >> (istream& in, Buffer<U>& buff)
 {
-	U tmp;
+	U temporary;
 	int n;
+
 	in>>n;
+
 	for(int i = 1; i <= n; i++)
 	{
-		in>>tmp;
-		buff.push(tmp);
+		in>>temporary;
+		if(buff.push(temporary));
 	}
+
 	return in;
 }
 
 template <class U> Buffer<U>& operator += (Buffer<U>& left, const Buffer<U>& right)
 {
 	
-	if(right.siz != 0)
+	if(right.size != 0)
 	{
 		typename Buffer<U> :: iterator it;
 		typename Buffer<U> :: iterator end;
 
 		it = right.first;
-		U tmp;
+		
+		U temporary;
+
 		end = right.last;
 		end++;
 
 		while(it != end)
 		{
-			tmp = *it;
-			left.push(tmp);
+			temporary = *it;
+			left.push(temporary);
 			it++;
 		}
 	}
@@ -320,11 +383,11 @@ template <class U> bool operator ==( const Buffer<U>& left, const Buffer<U>& rig
 	U a;
 	U b;
 
-	if(left.siz != right.siz) 
+	if(left.size != right.size) 
 	{
 		return false;
 	}
-	else if(left.siz == 0)
+	else if(left.size == 0)
 	{
 		return true;
 	}
