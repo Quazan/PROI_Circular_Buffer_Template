@@ -135,6 +135,8 @@ public:
 
 	const int count();
 
+	/*funckja wypisuje aktualny rozmiar bufora */
+
 	string get_error()
 	{
 		string temporary;
@@ -144,7 +146,7 @@ public:
 		return temporary;
 	}
 
-	/*funckja wypisuje aktualny rozmiar bufora */
+	/*funkcja zwraca błędy utraty danych*/ 
 
 	template <class U> friend ostream& operator << (ostream& out, const Buffer<U> &);
 	template <class U> friend istream& operator >> (istream& in, Buffer<U> &);
@@ -192,8 +194,6 @@ template <typename T> Buffer<T> :: Buffer(const Buffer<T>& right)
 	error_log.clear();
 
 	*this += right;
-
-	//size = right.size;
 }
 
 template <typename T> Buffer<T> :: ~Buffer()
@@ -227,13 +227,16 @@ template <typename T> int Buffer<T> :: push(T t)
 			error = true;
 			error_log += "Uwaga utrata danych\n";
 		}
+
 		pop();
 		size++;
+
 		return 1;
 	}
 	else
 	{
 		size++;
+
 		return 0;
 	}
 }
@@ -271,10 +274,16 @@ template <typename T> T Buffer<T> :: pop()
 
 template <typename T> const T Buffer<T> :: peak()
 {
-	if(first.wsk != NULL)
+	T t;
+
+	if(first != NULL)
 	{
-		return *first;
+		t =*first;
+
+		return t;
 	}
+
+	return t;
 }
 
 template <typename T> const int Buffer<T> :: count()
@@ -287,7 +296,7 @@ template <typename T> int Buffer<T> :: clear()
 	size = 0;
 	container * temporary = first.wsk;
 
-	while(first.wsk != NULL)
+	while(first != NULL)
 	{
 		temporary = first.wsk;
 
@@ -295,7 +304,7 @@ template <typename T> int Buffer<T> :: clear()
 
 		if(first.wsk)
 		{
-		first.wsk -> prev = NULL;
+			first.wsk -> prev = NULL;
 		}
 
 		delete temporary;

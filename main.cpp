@@ -91,6 +91,7 @@ int main()
 				break;
 
 			case 6:
+				cout<<one.peak();
 				cout<<one.pop()<<endl;	
 				break;
 
