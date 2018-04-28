@@ -38,15 +38,38 @@ private:
 		}
 
 		iterator& operator ++(int)
-		{
+		{	
+			if(wsk -> prev != nullptr)
+			{	
+				iterator it;
+				it.wsk = wsk -> prev;
+				if(it.wsk -> next == nullptr)
+				{
+					return *this;
+				}
+
+			}
+
 			iterator temporary = *this;
 			wsk = wsk -> next;
+
 			return *this;
 		}
 
 		iterator& operator ++()
 		{
+			if(wsk -> prev != nullptr)
+			{	
+				iterator it;
+				it.wsk = wsk -> prev;
+				if(it.wsk -> next == nullptr)
+				{
+					return *this;
+				}
+
+			}
 			wsk = wsk -> next;
+
 			return *this;
 		}
 
@@ -80,7 +103,7 @@ private:
 
 		bool operator != (std::nullptr_t) const
 		{
-			if(wsk != NULL)
+			if(wsk != nullptr)
 			{
 				return true;
 			}
@@ -90,7 +113,7 @@ private:
 
 		bool operator == (std::nullptr_t) const
 		{
-			if(wsk == NULL)
+			if(wsk == nullptr)
 			{
 				return true;
 			}
@@ -165,12 +188,11 @@ public:
 
 	iterator end()
 	{
-		if(last.wsk == NULL) return last;
+		if(last.wsk == nullptr) return last;
 
 		iterator temporary;
 		temporary = last;
 		temporary++;
-
 		return temporary;
 	}
 };
@@ -179,8 +201,8 @@ public:
 template <typename T> Buffer<T> :: Buffer()
 {
 	size = 0;
-	first.wsk = NULL;
-	last.wsk = NULL;
+	first.wsk = nullptr;
+	last.wsk = nullptr;
 	error = false;
 	error_log.clear();
 }
@@ -188,8 +210,8 @@ template <typename T> Buffer<T> :: Buffer()
 template <typename T> Buffer<T> :: Buffer(const Buffer<T>& right)
 {
 	size = 0;
-	first.wsk = NULL;
-	last.wsk = NULL;
+	first.wsk = nullptr;
+	last.wsk = nullptr;
 	error = false;
 	error_log.clear();
 
@@ -205,11 +227,11 @@ template <typename T> int Buffer<T> :: push(T t)
 {
 	container * current = new container;
 	container * temporary = last.wsk;
-	current -> next = NULL;
+	current -> next = nullptr;
 	current -> prev = temporary;
 	current -> cont = t;
 
-	if(last != NULL)
+	if(last != nullptr)
 	{
 		temporary -> next = current;
 	}
@@ -245,7 +267,7 @@ template <typename T> T Buffer<T> :: pop()
 {
 	T t;
 
-	if(size != 0 && first != NULL)
+	if(size != 0 && first != nullptr)
 	{
 		container * temporary = first.wsk;
 
@@ -255,7 +277,7 @@ template <typename T> T Buffer<T> :: pop()
 
 		if(first.wsk)
 		{
-			first.wsk -> prev = NULL;
+			first.wsk -> prev = nullptr;
 		}
 
 		delete temporary;
@@ -263,8 +285,8 @@ template <typename T> T Buffer<T> :: pop()
 
 		if(size == 0)
 		{
-			first.wsk = NULL;
-			last.wsk = NULL;
+			first.wsk = nullptr;
+			last.wsk = nullptr;
 		}
 		return t;
 	}
@@ -276,11 +298,9 @@ template <typename T> const T Buffer<T> :: peak()
 {
 	T t;
 
-	if(first != NULL)
+	if(first != nullptr)
 	{
-		t =*first;
-
-		return t;
+		return *first;
 	}
 
 	return t;
@@ -296,7 +316,7 @@ template <typename T> int Buffer<T> :: clear()
 	size = 0;
 	container * temporary = first.wsk;
 
-	while(first != NULL)
+	while(first != nullptr)
 	{
 		temporary = first.wsk;
 
@@ -304,13 +324,13 @@ template <typename T> int Buffer<T> :: clear()
 
 		if(first.wsk)
 		{
-			first.wsk -> prev = NULL;
+			first.wsk -> prev = nullptr;
 		}
 
 		delete temporary;
 	}
 
-	last.wsk = NULL;
+	last.wsk = nullptr;
 	error_log.clear();
 	error = false;
 }
@@ -327,7 +347,7 @@ template <class U> ostream& operator << (ostream & out, Buffer<U> const& buff)
 
 		it = buff.first;
 
-		while(it != NULL)
+		while(it != nullptr)
 		{
 			out<<*it<<" ";
 			it++;
@@ -366,14 +386,14 @@ template <class U> Buffer<U>& operator += (Buffer<U>& left, const Buffer<U>& rig
 		U temporary;
 
 		end = right.last;
-		end++;
 
 		while(it != end)
 		{
-			temporary = *it;
-			left.push(temporary);
+			left.push(*it);
 			it++;
 		}
+		left.push(*it);
+
 	}
 }
 
@@ -401,7 +421,7 @@ template <class U> bool operator ==( const Buffer<U>& left, const Buffer<U>& rig
 		return true;
 	}
 
-	while(l != NULL && r != NULL)
+	while(r != nullptr && l != nullptr)
 	{
 		a = *l;
 		b = *r;

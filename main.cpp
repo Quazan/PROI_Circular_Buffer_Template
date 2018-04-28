@@ -137,7 +137,6 @@ int main()
 				{
 					pomoc+=i;
 				}
-
 				tester += 1;
 				tester.push(2);
 				tester += 3;
@@ -145,9 +144,8 @@ int main()
 				tester.push(5);
 				tester += 6;
 				tester.push(7);
-
 				if(tester == pomoc)
-				{
+				{	
 					printf("Test poprawny\n");
 				}
 
